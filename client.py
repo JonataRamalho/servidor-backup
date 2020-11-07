@@ -1,10 +1,13 @@
+import os
 import socket
 
 HOST = '127.0.0.1'
-PORT = 8000  
+PORT = 10000  
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
+
+path = '//home/'
 
 def showMenu():
   print('\nInforme uma das opcoes:\n')
@@ -18,27 +21,58 @@ def showMenu():
   handleSelectedOption(option)
 
 def handleMenu(option):
-  case = {
-    1: lambda option: s.sendall(str.encode('1')),
-    2: lambda option: s.sendall(str.encode('2')),
-    3: lambda option: s.sendall(str.encode('3')),
-    5: lambda option: s.close(),
-    }
+  if (option == 1):
+    s.sendall(str.encode('TRANSMITIR')),
+  elif (option == 2):
+    s.sendall(str.encode('LISTAR')),
+  elif (option == 3):
+    s.sendall(str.encode('BAIXAR')),
+  elif (option == 5):
+    s.close(),
 
-  return case[option](option)
+def updatePath(currentDirectory):
+  global path
+  path = path+currentDirectory+'/'
+
+  return path
+
+def listDirectory(directory):
+  listDirectory = os.listdir(directory)
+  for i in listDirectory:
+    print(i)
 
 def handleSubMenu(option):
-  case = {
-    1: lambda option: 'Configurando apelido...',
-    2: lambda option: 'Configurando diretorio...',
-    3: lambda option: 'Configurando endereço IP...',
-    4: lambda option: showMenu(),
-    }
-  return case[option](option)
+  if (option == 1):
+    apelido_usuario = input('Informe seu apelido: ')
+    with open('client_data/apelido_usuario.txt','a') as arquivo:
+      arquivo.write('\n' + apelido_usuario)
+
+  elif (option == 2):
+    userName = input('\nInforme o nome do usuário do seu pc: ')
+    while not os.path.exists(path+userName):
+      userName = input('\nInsira um usuario valido!\n>>> ')
+
+    listDirectory(updatePath(userName))
+
+    directory = input('\n## Escolha um dos diretorios listados acima ##\nEx: Downloads\n>>> ')
+
+    while not os.path.exists(path+directory):
+      print('\nInsira um diretorio valido (lembre-se que os acentos contam)')
+      directory = input('>>> ')
+
+    print('\nSua rota de download foi configurada para: ' + updatePath(directory))
+    with open('client_data/diretorio_download.txt','w') as arquivo:
+      arquivo.write(path)
+
+  elif (option == 3):
+    print('Configurando endereço IP...')
+
+  elif (option == 4):
+    showMenu()
 
 def handleSelectedOption(option):
   if (option != 4):
-    response = handleMenu(option)
+    handleMenu(option)
 
     if (option == 5):
       print('Saindo...')
@@ -48,7 +82,7 @@ def handleSelectedOption(option):
     
   else: 
     subMenuOption = int(input('\n1. Configurar apelido' 
-                    '\n2. Configurar diretório de download'
+                    '\n2. Configurar diretorio de download'
                     '\n3. Configurar endereço IP do Coordenador'
                     '\n4. Voltar'
                     '\n\n>>> '))
