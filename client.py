@@ -41,6 +41,13 @@ def listDirectory(directory):
   for i in listDirectory:
     print(i)
 
+def getUserName():
+  userName = input('\nInforme o nome do usuário do seu pc: ')
+  while not os.path.exists(path+userName):
+    userName = input('\nInsira um usuario valido!\n>>> ')
+
+  updatePath(userName)
+
 def handleSubMenu(option):
   if (option == 1):
     apelido_usuario = input('Informe seu apelido: ')
@@ -48,11 +55,8 @@ def handleSubMenu(option):
       arquivo.write('\n' + apelido_usuario)
 
   elif (option == 2):
-    userName = input('\nInforme o nome do usuário do seu pc: ')
-    while not os.path.exists(path+userName):
-      userName = input('\nInsira um usuario valido!\n>>> ')
-
-    listDirectory(updatePath(userName))
+    getUserName()
+    listDirectory(path)
 
     directory = input('\n## Escolha um dos diretorios listados acima ##\nEx: Downloads\n>>> ')
 
