@@ -4,15 +4,15 @@ import socket
 HOST = '127.0.0.1'
 PORT = 10000  
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((HOST, PORT))
 
 path = '//home/'
 
 def showMenu():
   print('\nInforme uma das opcoes:\n')
   print('1. Transmitir arquivos'
-      '\n2. Listar arquivos disponı́veis por apelido' 
+      '\n2. Listar arquivos' 
       '\n3. Baixar arquivos'
       '\n4. Configurações'
       '\n5. Sair\n')
@@ -22,13 +22,13 @@ def showMenu():
 
 def handleMenu(option):
   if (option == 1):
-    s.sendall(str.encode('TRANSMITIR')),
+    client.sendall(str.encode('TRANSMITIR')),
   elif (option == 2):
-    s.sendall(str.encode('LISTAR')),
+    client.sendall(str.encode('LISTAR')),
   elif (option == 3):
-    s.sendall(str.encode('BAIXAR')),
+    client.sendall(str.encode('BAIXAR')),
   elif (option == 5):
-    s.close(),
+    client.close(),
 
 def updatePath(currentDirectory):
   global path
@@ -77,7 +77,7 @@ def handleSelectedOption(option):
     if (option == 5):
       print('Saindo...')
     else:
-      data = s.recv(1024)
+      data = client.recv(1024)
       print('>>> Resposta do servidor:', data.decode())
     
   else: 
