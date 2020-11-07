@@ -1,41 +1,26 @@
 import socket
 import threading
-import time
 
-HOST = ''     
-PORT = 8000 
+hostClient = ''
+portClient = 10000
+address = (hostClient, portClient)
 
-def connect(conn, cliente):
-    amount_Thread = threading.active_count()
+def connectDataChannel(connection, clientIP):
+    option = connection.recv(1024)
 
-    print('Quantidade de Thread: ', amount_Thread)
+    message = 'ok'
+    connection.sendall(str.encode(message))
+    connection.close()
 
-    print('Conectado por', cliente)
-    
-    time.sleep(10)
-    
-    while True:
-        data = conn.recv(1024)
-        if not data: 
-            print('Finalizando conexão')
-            conn.close()
-            break
-        conn.sendall(data)
-        
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-s.bind((HOST, PORT)) 
-
-s.listen() 
-
-print('Aguardando conexão de um cliente')
+socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+socketClient.bind(address)
+socketClient.listen()
 
 while True:
-    conn, ender = s.accept() 
+    connection, clientIP = socketClient.accept()
 
-    t = threading.Thread(target=connect,args=(conn, ender))
-
-    t.start()
+    clientThread = threading.Thread(target=connectDataChannel, args=(connection, clientIP))
+    clientThread.start()
 
 
 
