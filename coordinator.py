@@ -1,13 +1,11 @@
 import socket
 import threading
 
-hostClient = ''
-portClient = 10000
-address = (hostClient, portClient)
+def connectDataChannel():
+    print('Thread 1 ok')
 
-def connectDataChannel(connection, clientIP):
-    option = connection.recv(1024)
-    select(option.decode())
+def connectControlChannel(): 
+    print('Thread 2 ok')
 
 def select(option):
     if option == '1':
@@ -33,16 +31,11 @@ def send(message):
     connection.sendall(str.encode(message))
     connection.close()
 
-socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-socketClient.bind(address)
-socketClient.listen()
+dataChannelThread = threading.Thread(target=connectDataChannel, args=())
+controlChannelThread = threading.Thread(target=connectControlChannel, args=())
 
-while True:
-    connection, clientIP = socketClient.accept()
-
-    clientThread = threading.Thread(target=connectDataChannel, args=(connection, clientIP))
-    clientThread.start()
-
+dataChannelThread.start()
+controlChannelThread.start()
 
 
 
