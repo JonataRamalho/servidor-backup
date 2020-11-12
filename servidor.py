@@ -1,48 +1,76 @@
 import socket
 import json
+import os
 
 host, port = '', 9999
 addr = (host, port)
 
 
-def receber():
-    msg = ler_mensagem()
-    return json.loads(msg)
+def receive():
+    received = read_message()
+    return json.loads(received)
 
 
-def enviar(txt):
-    con.send(txt.encode())
+def submit(file):
+    con.send(file.encode())
 
 
-def ler_mensagem():
-    mensagem = con.recv(1024)
-    return mensagem.decode()
+def read_message():
+    message = con.recv(1024)
+    return message.decode()
 
 
-def salvar(nova_data):
-    index, content = nova_data["id"], nova_data["content"]
-    data = {index: content}
-
-    with open('data.json', 'w') as json_file:
-        json.dump(data, json_file, indent=2)
-
-    enviar('Sucesso')
+def read_data_json():
+    with open('data.json', 'r', encoding='utf8') as f:
+        return json.load(f)
 
 
-def baixar(index):
-    with open("data.json", "r") as json_file:
-        data = json.load(json_file)
-    data = data[index]
-    return data
+def data_is_empty():
+    file_size = os.stat('data.json').st_size
+
+    if file_size == 0:
+        return True
+    else:
+        return False
 
 
-def executar(data):
-    func = data["func"]
-    if func == "salvar":
-        salvar(data)
-    elif func == "baixar":
-        content = baixar(data["id"])
-        enviar(content)
+def save_json(json_file):
+    with open('data.json', 'w') as f:
+        json.dump(json_file, f, indent=2)
+
+
+def save(item):
+    data = {}
+    if data_is_empty():
+        data[item["id"]] = item["content"]
+        save_json(data)
+        return submit("success")
+    else:
+        data = read_data_json()
+        data[item["id"]] = item["content"]
+        save_json(data)
+        return submit("success")
+
+
+def rescue(key):
+    data = {}
+    if data_is_empty():
+        return submit("Error: The data is empty")
+    else:
+        data = read_data_json()
+        if key in data:
+            return submit(data[key])
+        else:
+            return submit("Error: ID not found")
+
+
+def run(file):
+    assignment = file["assignment"]
+
+    if assignment == "save":
+        save(file)
+    elif assignment == "rescue":
+        rescue(file["id"])
     else:
         return print('609')
 
@@ -56,8 +84,8 @@ serv_socket.listen()
 
 while True:
     con, cliente = serv_socket.accept()
-    msg = receber()
-    executar(msg)
+    received_file = receive()
+    run(received_file)
 
 
 serv_socket.close()
