@@ -1,7 +1,10 @@
 import os
 import socket
+import json
 
-HOST = '127.0.0.1'
+import clientHelpers
+
+HOST = ''
 PORT = 10000  
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -9,24 +12,59 @@ client.connect((HOST, PORT))
 
 path = '//home/'
 
+dispatchData = {
+  "apelido": clientHelpers.getData('client_data/apelido_usuario.txt'),
+  "nome_arquivo": "",
+  "conteudo": ""
+}
+
 def showMenu():
   print('\nInforme uma das opcoes:\n')
   print('1. Transmitir arquivos'
       '\n2. Listar arquivos' 
       '\n3. Baixar arquivos'
-      '\n4. Configurações'
+      '\n4. Configuracoes'
       '\n5. Sair\n')
   
   option = int(input('>>> '))
   handleSelectedOption(option)
 
 def handleMenu(option):
-  if (option == 1):
-    client.sendall(str.encode('TRANSMITIR')),
+  if (option == 1): 
+    if not clientHelpers.isEmpty('client_data/apelido_usuario.txt'):
+      client.sendall(str.encode('TRANSMITIR')) 
+      response = client.recv(1024)
+
+      if response.decode() == '255':
+        if len(path) >= 7:
+          getUserName() 
+
+        fileDirectory = input('\nInforme o diretorio do arquivo que deseja transmitir\nEx: ../Documentos/testando/teste.txt\n\n>>> '+path)
+        while not os.path.exists(path+fileDirectory):
+          fileDirectory = input('\nInsira um diretorio valido (lembre-se que os acentos contam)\n>>> '+path)
+
+        with open(path+fileDirectory, 'r') as file:
+          content = (file.read())
+
+        dispatchData['nome_arquivo'] = clientHelpers.getFileName(fileDirectory)
+        dispatchData['conteudo'] = content
+
+        data = json.dumps(dispatchData)
+        client.sendall(bytes(data, encoding="utf-8"))
+
+      else: 
+        print('Nao foi possivel se comunicar com o servidor')
+    else:
+      print('Apelido nao encontrado, adicione em: 4. Configuracoes -> 1. Configurar apelido')
+
   elif (option == 2):
-    client.sendall(str.encode('LISTAR')),
+    client.sendall(str.encode('LISTAR'))
+    response = client.recv(1024)
+
   elif (option == 3):
-    client.sendall(str.encode('BAIXAR')),
+    client.sendall(str.encode('BAIXAR'))
+    response = client.recv(1024)
+
   elif (option == 5):
     client.close(),
 
@@ -36,13 +74,8 @@ def updatePath(currentDirectory):
 
   return path
 
-def listDirectory(directory):
-  listDirectory = os.listdir(directory)
-  for i in listDirectory:
-    print(i)
-
 def getUserName():
-  userName = input('\nInforme o nome do usuário do seu pc: ')
+  userName = input('\nInforme o nome do usuario do seu pc: ')
   while not os.path.exists(path+userName):
     userName = input('\nInsira um usuario valido!\n>>> ')
 
@@ -51,12 +84,12 @@ def getUserName():
 def handleSubMenu(option):
   if (option == 1):
     apelido_usuario = input('Informe seu apelido: ')
-    with open('client_data/apelido_usuario.txt','a') as arquivo:
-      arquivo.write('\n' + apelido_usuario)
+    with open('client_data/apelido_usuario.txt','w') as arquivo:
+      arquivo.write(apelido_usuario)
 
   elif (option == 2):
     getUserName()
-    listDirectory(path)
+    clientHelpers.listDirectory(path)
 
     directory = input('\n## Escolha um dos diretorios listados acima ##\nEx: Downloads\n>>> ')
 
@@ -80,9 +113,6 @@ def handleSelectedOption(option):
 
     if (option == 5):
       print('Saindo...')
-    else:
-      data = client.recv(1024)
-      print('>>> Resposta do servidor:', data.decode())
     
   else: 
     subMenuOption = int(input('\n1. Configurar apelido' 
