@@ -97,9 +97,9 @@ def handleSubMenu(option):
       print('\nInsira um diretorio valido (lembre-se que os acentos contam)')
       directory = input('>>> ')
 
-    print('\nSua rota de download foi configurada para: ' + updatePath(directory))
+    print('\nSua rota de download foi configurada para: ' + path+directory)
     with open('client_data/diretorio_download.txt','w') as arquivo:
-      arquivo.write(path)
+      arquivo.write(path+directory)
 
   elif (option == 3):
     print('Configurando endereço IP...')

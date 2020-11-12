@@ -1,3 +1,5 @@
+import os
+
 def getFileName(directory):
   directory = directory.split("/")
   return directory[len(directory)-1]
