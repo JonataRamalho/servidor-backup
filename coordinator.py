@@ -34,15 +34,19 @@ def acceptConnection(client):
 def createClientThread(connection, clientIP):
     print('Conectado por', clientIP)
 
-    clientThread = threading.Thread(target=teste, args=(connection,))
+    clientThread = threading.Thread(target=confirmConnectionAndExtractData, args=(connection,))
     clientThread.start()
 
-def teste(connection):
-    data = connection.recv(1024)
+def confirmConnectionAndExtractData(connection):
+    data = extractData(connection)
 
-    connection.sendall(data)
-    
-    print('Coordenador se comunicou com Cliente \n')
+    confirmConnection(connection)
+
+def extractData(connection):
+    return connection.recv(2048)
+
+def confirmConnection(connection):
+    connection.sendall(str.encode("255"))
 
 def select(option):
     if option == '1':
