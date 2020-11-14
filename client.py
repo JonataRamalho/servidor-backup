@@ -47,6 +47,10 @@ def handleMenu(option):
   elif (option == 5):
     client.close()
 
+  else:
+    print('NUMERO DE OPCAO INVALIDA!')
+    showMenu()
+
 def upload():
   client.sendall(str.encode('TRANSMITIR')) 
   response = client.recv(1024)
@@ -124,12 +128,16 @@ def handleSubMenu(option):
 
   elif (option == 2):
     confDownload()
-    
+
   elif (option == 3):
     print('Configurando endereço IP...')
 
   elif (option == 4):
     showMenu()
+  
+  else:
+    print('NUMERO DE OPCAO INVALIDA!')
+    showSubMenu()
 
 def confNickName():
   apelido_usuario = input('Informe seu apelido: ')
