@@ -109,31 +109,46 @@ def getUserName():
 
   updatePath(userName)
 
+def showSubMenu():
+  subMenuOption = int(input('\n1. Configurar apelido' 
+                    '\n2. Configurar diretorio de download'
+                    '\n3. Configurar endereço IP do Coordenador'
+                    '\n4. Voltar'
+                    '\n\n>>> '))
+  
+  handleSubMenu(subMenuOption)
+
 def handleSubMenu(option):
   if (option == 1):
-    apelido_usuario = input('Informe seu apelido: ')
-    with open('client_data/apelido_usuario.txt','w') as arquivo:
-      arquivo.write(apelido_usuario)
+    confNickName()
 
   elif (option == 2):
-    getUserName()
-    clientHelpers.listDirectory(path)
-
-    directory = input('\n## Escolha um dos diretorios listados acima ##\nEx: Downloads\n>>> ')
-
-    while not os.path.exists(path+directory):
-      print('\nInsira um diretorio valido (lembre-se que os acentos contam)')
-      directory = input('>>> ')
-
-    print('\nSua rota de download foi configurada para: ' + path+directory)
-    with open('client_data/diretorio_download.txt','w') as arquivo:
-      arquivo.write(path+directory)
-
+    confDownload()
+    
   elif (option == 3):
     print('Configurando endereço IP...')
 
   elif (option == 4):
     showMenu()
+
+def confNickName():
+  apelido_usuario = input('Informe seu apelido: ')
+  with open('client_data/apelido_usuario.txt','w') as arquivo:
+    arquivo.write(apelido_usuario)
+
+def confDownload():
+  getUserName()
+  clientHelpers.listDirectory(path)
+
+  directory = input('\n## Escolha um dos diretorios listados acima ##\nEx: Downloads\n>>> ')
+
+  while not os.path.exists(path+directory):
+    print('\nInsira um diretorio valido (lembre-se que os acentos contam)')
+    directory = input('>>> ')
+
+  print('\nSua rota de download foi configurada para: ' + path+directory)
+  with open('client_data/diretorio_download.txt','w') as arquivo:
+    arquivo.write(path+directory)
 
 def handleSelectedOption(option):
   if (option != 4):
@@ -143,12 +158,6 @@ def handleSelectedOption(option):
       print('Saindo...')
     
   else: 
-    subMenuOption = int(input('\n1. Configurar apelido' 
-                    '\n2. Configurar diretorio de download'
-                    '\n3. Configurar endereço IP do Coordenador'
-                    '\n4. Voltar'
-                    '\n\n>>> '))
-
-    handleSubMenu(subMenuOption)
+    showSubMenu()
 
 showMenu()
