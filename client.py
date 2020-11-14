@@ -34,6 +34,24 @@ def showMenu():
   option = int(input('>>> '))
   handleSelectedOption(option)
 
+def handleSelectedOption(option):
+  if (option != 5 and option != 4):
+    if not clientHelpers.isEmpty('client_data/apelido_usuario.txt'):
+      handleMenu(option) 
+    else:
+      print('CONFIGURE UM APELIDO PRIMEIRO\n')
+      handleSubMenu(1)
+      print('Configurado ^^')
+      showMenu()
+  
+  elif (option == 5):
+    client.sendall(str.encode('SAIR'))
+    print(client.recv(1024).decode())
+    client.close()
+
+  else: 
+    showSubMenu()
+
 def handleMenu(option):
   if (option == 1): 
     upload()
@@ -44,10 +62,7 @@ def handleMenu(option):
   elif (option == 3):
     download()
 
-  elif (option == 5):
-    client.close()
-
-  else:
+  elif (option != 5):
     print('NUMERO DE OPCAO INVALIDA!')
     showMenu()
 
@@ -157,15 +172,5 @@ def confDownload():
   print('\nSua rota de download foi configurada para: ' + path+directory)
   with open('client_data/diretorio_download.txt','w') as arquivo:
     arquivo.write(path+directory)
-
-def handleSelectedOption(option):
-  if (option != 4):
-    handleMenu(option)
-
-    if (option == 5):
-      print('Saindo...')
-    
-  else: 
-    showSubMenu()
 
 showMenu()

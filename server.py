@@ -22,18 +22,24 @@ while True:
   data = connection.recv(1024)
   print('Metodo:')
   print(data)
-  connection.sendall(str.encode('255'))
+  if data.decode() != 'SAIR':
+    connection.sendall(str.encode('255'))
 
-  #recebe arquivo json
-  data = connection.recv(1024)
-  data.decode()
-  data = json.loads(data)
-  print("Arquivo JSON:")
-  print(data)
+    #recebe arquivo json
+    data = connection.recv(1024)
+    data.decode()
+    data = json.loads(data)
+    print("Arquivo JSON:")
+    print(data)
+    
+    #simula envio para download
+    connection.sendall(str.encode('enviando arquivo ...'))
+
+  # Caso o usuario aperte em sair
+  else:
+    connection.sendall(str.encode('Saindo...'))
+
   
-  #simula envio para download
-  connection.sendall(str.encode('enviando arquivo ...'))
-
   print('\n>>> Fechando a conexão')
   connection.close()
   break
