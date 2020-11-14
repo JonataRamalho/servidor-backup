@@ -53,17 +53,16 @@ def handleSelectedOption(option):
     showSubMenu()
 
 def handleMenu(option):
-  if (option == 1): 
-    upload()
+  try:
+    case = {
+    1: lambda option: upload(),
+    2: lambda option: toList(),
+    3: lambda option: download(),
+    }
+    return case[option](option)
 
-  elif (option == 2):
-    toList()
-
-  elif (option == 3):
-    download()
-
-  elif (option != 5):
-    print('NUMERO DE OPCAO INVALIDA!')
+  except:
+    print('OPCAO INVALIDA!')
     showMenu()
 
 def upload():
@@ -138,20 +137,17 @@ def showSubMenu():
   handleSubMenu(subMenuOption)
 
 def handleSubMenu(option):
-  if (option == 1):
-    confNickName()
+  try:
+    case = {
+    1: lambda option: confNickName(),
+    2: lambda option: confDownload(),
+    3: lambda option: print('Configurando endereço IP...'),
+    4: lambda option: showMenu(),
+    }
+    return case[option](option)
 
-  elif (option == 2):
-    confDownload()
-
-  elif (option == 3):
-    print('Configurando endereço IP...')
-
-  elif (option == 4):
-    showMenu()
-  
-  else:
-    print('NUMERO DE OPCAO INVALIDA!')
+  except:
+    print('OPCAO INVALIDA!')
     showSubMenu()
 
 def confNickName():
