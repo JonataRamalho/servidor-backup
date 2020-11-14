@@ -14,6 +14,9 @@ print('>>> Aguardando conexão com cliente')
 connection, address = s.accept()
 
 print('>>> Conectado em', address)
+
+downloadTest = {}
+
 while True:
   #recebe o metodo, envia status
   data = connection.recv(1024)
@@ -28,6 +31,9 @@ while True:
   print("Arquivo JSON:")
   print(data)
   
+  #simula envio para download
+  connection.sendall(str.encode('enviando arquivo ...'))
+
   print('\n>>> Fechando a conexão')
   connection.close()
   break
