@@ -1,14 +1,16 @@
+import sys
 import os
 import socket
 import json
 
 import clientHelpers
 
-HOST = ''
+ip = clientHelpers.getData('client_data/ip_servidor.txt')
+
+HOST = ip
 PORT = 10000  
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((HOST, PORT))
 
 path = '//home/'
 
@@ -22,6 +24,11 @@ downloadData = {
   "id": "",
   "apelido": clientHelpers.getData('client_data/apelido_usuario.txt'),
 }
+
+def toConnect():
+  try:
+    client.connect((HOST, PORT))
+  except Exception as e: print("erro: ",e, 'Verifique se o endereco IP esta correto')
 
 def showMenu():
   print('\nInforme uma das opcoes:\n')
@@ -45,15 +52,14 @@ def handleSelectedOption(option):
       showMenu()
   
   elif (option == 5):
-    client.sendall(str.encode('SAIR'))
-    print(client.recv(1024).decode())
-    client.close()
+    print('Saindo...')
 
   else: 
     showSubMenu()
 
 def handleMenu(option):
   try:
+    toConnect()
     case = {
     1: lambda option: upload(),
     2: lambda option: toList(),
@@ -141,7 +147,7 @@ def handleSubMenu(option):
     case = {
     1: lambda option: confNickName(),
     2: lambda option: confDownload(),
-    3: lambda option: print('Configurando endereço IP...'),
+    3: lambda option: confIP(),
     4: lambda option: showMenu(),
     }
     return case[option](option)
@@ -168,5 +174,13 @@ def confDownload():
   print('\nSua rota de download foi configurada para: ' + path+directory)
   with open('client_data/diretorio_download.txt','w') as arquivo:
     arquivo.write(path+directory)
+
+def confIP():
+  global ip
+  ip = input('\n## Informe o IP do servidor ##\n>>> ')
+
+  print('\nIP do servidor configurado para: ' + ip)
+  with open('client_data/ip_servidor.txt','w') as arquivo:
+    arquivo.write(ip)
 
 showMenu()
