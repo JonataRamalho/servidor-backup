@@ -1,6 +1,7 @@
 import socket
 import threading
 import json
+import random
 
 def connectDataChannel():
     client = createSocketClient()
@@ -53,7 +54,7 @@ def selectOption(connection):
     option = data.decode()
 
     if option == 'TRANSMITIR':
-        transmitFile()
+        transmitFile(connection)
     elif option == 'LISTAR':
         listFile()
     elif option == 'BAIXAR':
@@ -62,9 +63,20 @@ def selectOption(connection):
 def extractData(connection):
     return connection.recv(2048)
 
-def transmitFile():
-    message = 'Opção selecionada >> Transmitir arquivos'
-    print(message)
+def transmitFile(connection):
+    identifier = generateID()
+    print(identifier)
+    
+    '''data = extractData(connection)
+
+    x = data.decode()
+
+    x = json.loads(x)
+
+    print(x)'''
+
+def generateID():
+    return random.randint(0, 10000)
 
 def listFile():
     message = 'Opção selecionada >> Listar arquivos'
