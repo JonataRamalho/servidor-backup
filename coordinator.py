@@ -1,5 +1,6 @@
 import socket
 import threading
+import json
 
 def connectDataChannel():
     client = createSocketClient()
@@ -34,39 +35,44 @@ def acceptConnection(client):
 def createClientThread(connection, clientIP):
     print('Conectado por', clientIP)
 
-    clientThread = threading.Thread(target=confirmConnectionAndExtractData, args=(connection,))
+    clientThread = threading.Thread(target=confirmConnectionAndSelectOption, args=(connection,))
     clientThread.start()
 
-def confirmConnectionAndExtractData(connection):
-    data = extractData(connection)
+def confirmConnectionAndSelectOption(connection):
 
     confirmConnection(connection)
 
-def extractData(connection):
-    return connection.recv(2048)
+    selectOption(connection)
 
 def confirmConnection(connection):
     connection.sendall(str.encode("255"))
 
-def select(option):
-    if option == '1':
-        transferFile()
-    elif option == '2':
+def selectOption(connection):
+    data = extractData(connection)
+
+    option = data.decode()
+
+    if option == 'TRANSMITIR':
+        transmitFile()
+    elif option == 'LISTAR':
         listFile()
-    else:
+    elif option == 'BAIXAR':
         downloadFile()
     
-def transferFile():
-    message = 'Opção selecionada >> Transmitir arquivo'
-    send(message)
+def extractData(connection):
+    return connection.recv(2048)
+
+def transmitFile():
+    message = 'Opção selecionada >> Transmitir arquivos'
+    print(message)
 
 def listFile():
     message = 'Opção selecionada >> Listar arquivos'
-    send(message)
+    print(message)
 
 def downloadFile():
     message = 'Opção selecionada >> Baixar arquivo'
-    send(message)
+    print(message)
 
 def send(message):
     connection.sendall(str.encode(message))
