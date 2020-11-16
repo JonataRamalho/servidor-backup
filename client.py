@@ -14,10 +14,10 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 path = '//home/'
 
-dispatchData = {
+uploadData = {
   "apelido": clientHelpers.getData('client_data/apelido_usuario.txt'),
   "nome_arquivo": "",
-  "conteudo": ""
+  "conteudo_arquivo": ""
 }
 
 downloadData = {
@@ -28,7 +28,7 @@ downloadData = {
 def toConnect():
   try:
     client.connect((HOST, PORT))
-  except Exception as e: print("erro: ",e, 'Verifique se o endereco IP esta correto')
+  except Exception as e: print("erro: ",e, '>>> Servidor pode esta fora do ar ou o endereco IP esta incorreto')
 
 def showMenu():
   print('\nInforme uma das opcoes:\n')
@@ -47,10 +47,13 @@ def handleSelectedOption(option):
       handleMenu(option) 
     else:
       print('CONFIGURE UM APELIDO PRIMEIRO\n')
-      handleSubMenu(1)
-      print('Configurado ^^')
-      showMenu()
-  
+      try:
+        handleSubMenu(1)
+        uploadData['apelido'] = clientHelpers.getData('client_data/apelido_usuario.txt')
+        print('Configurado ^^')
+        showMenu()
+      except Exception as e: print("erro: ",e, 'Nao foi possivel configurar apelido')
+      
   elif (option == 5):
     print('Saindo...')
 
@@ -86,11 +89,11 @@ def upload():
     with open(path+fileDirectory, 'r') as file:
       content = (file.read())
 
-    dispatchData['nome_arquivo'] = clientHelpers.getFileName(fileDirectory)
-    dispatchData['conteudo'] = content
+      uploadData['nome_arquivo'] = clientHelpers.getFileName(fileDirectory)
+      uploadData['conteudo_arquivo'] = content
 
-    data = json.dumps(dispatchData)
-    client.sendall(bytes(data, encoding="utf-8"))
+      data = json.dumps(uploadData)
+      client.sendall(bytes(data, encoding="utf-8"))
 
   else: 
     print('Nao foi possivel se comunicar com o servidor')
@@ -99,7 +102,7 @@ def toList():
   client.sendall(str.encode('LISTAR'))
   response = client.recv(1024)
   if response.decode() == '255':
-    data = json.dumps(dispatchData['apelido'])
+    data = json.dumps(uploadData['apelido'])
 
     client.sendall(bytes(data, encoding="utf-8"))
 
@@ -160,6 +163,8 @@ def confNickName():
   apelido_usuario = input('Informe seu apelido: ')
   with open('client_data/apelido_usuario.txt','w') as arquivo:
     arquivo.write(apelido_usuario)
+    print('Apelido configurado para: ', apelido_usuario)
+
 
 def confDownload():
   getUserName()
@@ -171,16 +176,16 @@ def confDownload():
     print('\nInsira um diretorio valido (lembre-se que os acentos contam)')
     directory = input('>>> ')
 
-  print('\nSua rota de download foi configurada para: ' + path+directory)
   with open('client_data/diretorio_download.txt','w') as arquivo:
     arquivo.write(path+directory)
+    print('\nSua rota de download foi configurada para: ' + path+directory)
 
 def confIP():
   global ip
   ip = input('\n## Informe o IP do servidor ##\n>>> ')
 
-  print('\nIP do servidor configurado para: ' + ip)
   with open('client_data/ip_servidor.txt','w') as arquivo:
     arquivo.write(ip)
+    print('\nIP do servidor configurado para: ' + ip)
 
 showMenu()
