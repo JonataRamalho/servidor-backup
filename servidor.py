@@ -2,9 +2,6 @@ import socket
 import json
 import os
 
-host, port = '', 9999
-addr = (host, port)
-
 
 def receive():
     received = read_message()
@@ -52,6 +49,12 @@ def save(item):
         return submit("success")
 
 
+def saveIP(ip):
+    file = open('ip_cordenador.txt', 'w')
+    file.write(ip)
+    file.close()
+
+
 def rescue(key):
     data = {}
     if data_is_empty():
@@ -75,17 +78,51 @@ def run(file):
         return print('609')
 
 
-serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+def iniciar():
+    port = 9999
+    host = open('ip_cordenador.txt', 'r')
+    host = host.read()
 
-serv_socket.bind(addr)
-serv_socket.listen()
+    serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    serv_socket.bind((host, port))
+    serv_socket.listen()
+
+    while True:
+        global con
+        con, cliente = serv_socket.accept()
+        received_file = receive()
+
+        run(received_file)
 
 
-while True:
-    con, cliente = serv_socket.accept()
-    received_file = receive()
-    run(received_file)
+def cadastrar():
+
+    response = input('IP: ')
+    saveIP(response)
+
+    iniciar()
 
 
-serv_socket.close()
+def descadastrar():
+    return None
+
+
+def menu():
+    print('1: Cadastrar servidor')
+    print('2: Iniciar')
+    print('3: Descadastrar \n')
+
+    response = int(input('> '))
+
+    if response == 1:
+        return cadastrar()
+    elif response == 2:
+        return iniciar()
+    elif response == 3:
+        return descadastrar()
+
+
+con = None
+
+menu()
