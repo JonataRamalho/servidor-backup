@@ -71,6 +71,8 @@ def transmitFile(connection):
 
     transmit(content, identifier)
 
+    connection.sendall(str.encode(str(identifier)))
+
 def transmit(content, identifier):
     content = content['conteudo_arquivo']
 
