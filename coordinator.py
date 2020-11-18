@@ -4,32 +4,32 @@ import json
 import random
 
 def connectDataChannel():
-    client = createSocketClient()
+    dataChannelSocket = createDataChannelSocket()
 
-    acceptConnection(client)
+    acceptConnection(dataChannelSocket)
 
 def connectControlChannel(): 
     print('Thread canal de controle ')
 
-def createSocketClient():
-    address = informClientAddress()
+def createDataChannelSocket():
+    address = informDataChannelAddress()
 
-    socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socketClient.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    socketClient.bind(address)
-    socketClient.listen()
+    dataChannelSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    dataChannelSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    dataChannelSocket.bind(address)
+    dataChannelSocket.listen()
 
-    return socketClient
+    return dataChannelSocket
 
-def informClientAddress():
-    hostClient = ''
-    portClient = 10000
+def informDataChannelAddress():
+    host = ''
+    port = 10000
 
-    return (hostClient, portClient)
+    return (host, port)
 
-def acceptConnection(client):
+def acceptConnection(dataChannelSocket):
     while True:
-        connection, clientIP = client.accept()
+        connection, clientIP = dataChannelSocket.accept()
 
         createClientThread(connection, clientIP)
 
