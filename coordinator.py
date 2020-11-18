@@ -49,7 +49,7 @@ def confirmConnection(connection):
     connection.sendall(str.encode("255"))
 
 def selectOption(connection):
-    data = extractData(connection)
+    data = getData(connection)
 
     option = data.decode()
 
@@ -60,23 +60,37 @@ def selectOption(connection):
     elif option == 'BAIXAR':
         downloadFile()
     
-def extractData(connection):
+def getData(connection):
     return connection.recv(2048)
 
 def transmitFile(connection):
     identifier = generateID()
-    print(identifier)
     
-    '''data = extractData(connection)
+    content = getContent(connection)
 
-    x = data.decode()
+    content = organizeData(content, identifier)
 
-    x = json.loads(x)
+    content = json.dumps(content)
 
-    print(x)'''
+    print(content)
 
 def generateID():
     return random.randint(0, 10000)
+
+def getContent(connection):
+    data = getData(connection)
+    data = data.decode()
+    data = json.loads(data)    
+
+    return data['conteudo_arquivo']
+
+def organizeData(content, identifier):
+    data = {
+        'id': str(identifier),
+        'content': content
+    }
+
+    return data
 
 def listFile():
     message = 'Opção selecionada >> Listar arquivos'
