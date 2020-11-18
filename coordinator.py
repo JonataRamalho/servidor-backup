@@ -63,6 +63,8 @@ def getData(connection):
     return connection.recv(2048)
 
 def transmitFile(connection):
+    controlChannelSocket.sendall(str.encode("TRANSMITIR"))
+
     identifier = generateID()
     
     content = getContent(connection)
@@ -114,7 +116,8 @@ def createControlChannelSocket():
 
     controlChannelSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     controlChannelSocket.connect(address)
-
+    controlChannelSocket.sendall(str.encode("255"))
+    
     return controlChannelSocket
 
 def informControlChannelAddress():
