@@ -67,6 +67,11 @@ def transmitFile(connection):
     
     content = getContent(connection)
 
+    transmit(content, identifier)
+
+def transmit(content, identifier):
+    content = content['conteudo_arquivo']
+
     content = organizeData(content, identifier)
 
     content = json.dumps(content)
@@ -81,7 +86,7 @@ def getContent(connection):
     data = data.decode()
     data = json.loads(data)    
 
-    return data['conteudo_arquivo']
+    return data
 
 def organizeData(content, identifier):
     data = {
