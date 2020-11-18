@@ -3,13 +3,12 @@ import threading
 import json
 import random
 
+controlChannelSocket = ''
+
 def connectDataChannel():
     dataChannelSocket = createDataChannelSocket()
 
     acceptConnection(dataChannelSocket)
-
-def connectControlChannel(): 
-    print('Thread canal de controle ')
 
 def createDataChannelSocket():
     address = informDataChannelAddress()
@@ -72,7 +71,7 @@ def transmitFile(connection):
 
     content = json.dumps(content)
 
-    print(content)
+    send(content)
 
 def generateID():
     return random.randint(0, 10000)
@@ -100,10 +99,29 @@ def downloadFile():
     message = 'Opção selecionada >> Baixar arquivo'
     print(message)
 
-def send(message):
-    connection.sendall(str.encode(message))
-    connection.close()
+def connectControlChannel(): 
+    global controlChannelSocket
 
+    controlChannelSocket = createControlChannelSocket()
+
+def createControlChannelSocket():
+    address = informControlChannelAddress()
+
+    controlChannelSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    controlChannelSocket.connect(address)
+
+    return controlChannelSocket
+
+def informControlChannelAddress():
+    host = ''
+    port = 8000
+
+    return (host, port)
+
+def send(data):
+    controlChannelSocket.sendall(bytes(data, encoding="utf-8"))
+
+#Main
 dataChannelThread = threading.Thread(target=connectDataChannel, args=())
 controlChannelThread = threading.Thread(target=connectControlChannel, args=())
 
