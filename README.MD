@@ -7,7 +7,7 @@
   <a href="#tecnologias">Tecnologias</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#participantes">Participantes</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#como-executar">Como Executar</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-    <a href="#protocolo">Protocolo</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <a href="#protocolo">Protocolo</a>
 
 </p>
 
@@ -76,7 +76,9 @@ A aplicação como visto na imagem acima apresenta três tipos de nós. São ele
   $ python3 client.py
 ```
 
-> **Lembre-se** _de executar nessa ordem para que tudo funcione como o desejado_ 3. Do lado do cliente irá aparecer o seguinte menu:
+> **Lembre-se** _de executar nessa ordem para que tudo funcione como o desejado_ 
+
+3. Do lado do cliente irá aparecer o seguinte menu:
 
 ```
   1. Transmitir 			# Faz o upload de arquivos
