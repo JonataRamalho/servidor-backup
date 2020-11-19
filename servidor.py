@@ -2,6 +2,8 @@ import socket
 import json
 import os
 
+con = None
+
 
 def receive():
     received = read_message()
@@ -18,8 +20,12 @@ def read_message():
 
 
 def read_data_json():
-    with open('data.json', 'r', encoding='utf8') as f:
-        return json.load(f)
+    try:
+        with open('data.json', 'r', encoding='utf8') as f:
+            return json.load(f)
+    except IOError:
+        with open('data.json', 'w', encoding='utf8') as f:
+            return read_data_json()
 
 
 def data_is_empty():
@@ -78,10 +84,20 @@ def run(file):
         return print('609')
 
 
-def iniciar():
-    port = 9999
-    host = open('ip_cordenador.txt', 'r')
-    host = host.read()
+def startServer():
+    port = 10000
+    try:
+        with open('ip_cordenador.txt', 'r') as f:
+            host = f
+            host = host.read()
+            if host == '':
+                print(
+                    '\nErro: coordenador não cadastrado! \nEscolha a opção 1 para cadastrargit o IP. \n')
+                menu()
+    except IOError:
+        print(
+            '\nErro: coordenador não cadastrado! \nEscolha a opção 1 para cadastrar o IP. \n')
+        menu()
 
     serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -96,19 +112,68 @@ def iniciar():
         run(received_file)
 
 
-def cadastrar():
+def sendRegistration():
+    HOST = open('ip_cordenador.txt', 'r')
+    HOST = HOST.read()
+    PORT = 9999
 
+    try:
+        serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serv_socket.connect((HOST, PORT))
+    except IOError:
+        print('\nErro: Coordenador não encontrado. \nVerifique se ele está online.\n')
+
+    hostName = socket.gethostname()
+    ip = socket.gethostbyname(hostName)
+
+    msg = {
+        "ip": ip
+    }
+
+    data = json.dumps(msg)
+    serv_socket.sendall(bytes(data, encoding="utf-8"))
+
+    data = serv_socket.recv(1024).decode()
+    print('Response:', data)
+
+
+def register():
     response = input('IP: ')
     saveIP(response)
 
-    iniciar()
+    sendRegistration()
+    startServer()
 
 
-def descadastrar():
-    return None
+def unsubscribe():
+    HOST = open('ip_cordenador.txt', 'r')
+    HOST = HOST.read()
+    PORT = 9999
+
+    try:
+        serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serv_socket.connect((HOST, PORT))
+    except IOError:
+        print('\nErro: Coordenador não encontrado. \nVerifique se ele está online.\n')
+
+    hostName = socket.gethostname()
+    ip = socket.gethostbyname(hostName)
+
+    msg = {
+        "assignment": "descadastrar",
+        "ip": ip
+    }
+
+    data = json.dumps(msg)
+    serv_socket.sendall(bytes(data, encoding="utf-8"))
+
+    os.remove('ip_cordenador.txt')
+
+    data = serv_socket.recv(1024).decode()
+    print('Response:', data)
 
 
-def menu():
+def menuCompleto():
     print('1: Cadastrar servidor')
     print('2: Iniciar')
     print('3: Descadastrar \n')
@@ -116,13 +181,42 @@ def menu():
     response = int(input('> '))
 
     if response == 1:
-        return cadastrar()
+        return register()
     elif response == 2:
-        return iniciar()
+        return startServer()
     elif response == 3:
-        return descadastrar()
+        return unsubscribe()
+    else:
+        print('Invalido \n')
+        menuCompleto()
 
 
-con = None
+def menuSimplificado():
+    print('1: Iniciar')
+    print('2: Descadastrar \n')
+
+    response = int(input('> '))
+
+    if response == 1:
+        return startServer()
+    elif response == 2:
+        return unsubscribe()
+    else:
+        print('Invalido \n')
+        menuSimplificado()
+
+
+def menu():
+    try:
+        with open('ip_cordenador.txt', 'r') as f:
+            host = f
+            host = host.read()
+            if host == '':
+                menuCompleto()
+            else:
+                menuSimplificado()
+    except IOError:
+        menuCompleto()
+
 
 menu()
