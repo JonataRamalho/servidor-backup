@@ -79,15 +79,6 @@ def transmitFile(connection):
 
     connection.sendall(str.encode(str(identifier)))
 
-def transmit(content, identifier):
-    content = content['conteudo_arquivo']
-
-    content = organizeData(content, identifier)
-
-    content = json.dumps(content)
-
-    send(content)
-
 def generateID():
     return random.randint(0, 10000)
 
@@ -97,6 +88,15 @@ def getContent(connection):
     data = json.loads(data)    
 
     return data
+
+def transmit(content, identifier):
+    content = content['conteudo_arquivo']
+
+    content = organizeData(content, identifier)
+
+    content = json.dumps(content)
+
+    send(content)
 
 def organizeData(content, identifier):
     data = {
