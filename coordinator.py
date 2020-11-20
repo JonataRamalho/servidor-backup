@@ -3,9 +3,11 @@ import threading
 import json
 import random
 import collections
+import os
 
 controlChannelSocket = ''
 data = collections.defaultdict(dict)
+verification = False
 
 def connectDataChannel():
     dataChannelSocket = createDataChannelSocket()
@@ -114,6 +116,9 @@ def saveLocally(content, identifier, ip):
     fileName = content['nome_arquivo']
     serverIp = ip
     
+    data = checkFile(data)
+
+    data[nickname] = data.get(nickname, {})
     data[nickname][fileId] = []
     data[nickname][fileId].append(fileName)
     data[nickname][fileId].append(serverIp)
@@ -123,6 +128,20 @@ def saveLocally(content, identifier, ip):
 def save(data):
     with open('coordinatorData.json', 'w') as jsonFile:
         json.dump(data, jsonFile, indent=2)
+
+def checkFile(data):
+    global verification
+    
+    fileVerification = os.path.exists('coordinatorData.json')
+
+    if fileVerification and verification == False:
+        verification = True
+        with open('coordinatorData.json', 'r') as jsonFile:
+            data = json.load(jsonFile)
+            
+            return data
+    
+    return data
 
 def listFile():
     message = 'Opção selecionada >> Listar arquivos'
