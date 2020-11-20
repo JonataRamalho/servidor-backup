@@ -2,8 +2,10 @@ import socket
 import threading
 import json
 import random
+import collections
 
 controlChannelSocket = ''
+data = collections.defaultdict(dict)
 
 def connectDataChannel():
     dataChannelSocket = createDataChannelSocket()
@@ -71,6 +73,10 @@ def transmitFile(connection):
 
     transmit(content, identifier)
 
+    ip = '127.0.0.1'
+
+    saveLocally(content, identifier, ip)
+
     connection.sendall(str.encode(str(identifier)))
 
 def transmit(content, identifier):
@@ -99,6 +105,24 @@ def organizeData(content, identifier):
     }
 
     return data
+
+def saveLocally(content, identifier, ip):
+    global data
+
+    nickname = content['apelido']
+    fileId = str(identifier)
+    fileName = content['nome_arquivo']
+    serverIp = ip
+    
+    data[nickname][fileId] = []
+    data[nickname][fileId].append(fileName)
+    data[nickname][fileId].append(serverIp)
+
+    save(data)
+
+def save(data):
+    with open('coordinatorData.json', 'w') as jsonFile:
+        json.dump(data, jsonFile, indent=2)
 
 def listFile():
     message = 'Opção selecionada >> Listar arquivos'
