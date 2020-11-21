@@ -58,8 +58,10 @@ def selectOption(connection):
 
     if option == 'TRANSMITIR':
         transmitFile(connection)
+        connection.close()
     elif option == 'LISTAR':
-        listFile()
+        listFile(connection)
+        connection.close()
     elif option == 'BAIXAR':
         downloadFile()
     
@@ -143,9 +145,39 @@ def checkFile(data):
     
     return data
 
-def listFile():
-    message = 'Opção selecionada >> Listar arquivos'
-    print(message)
+def listFile(connection):
+    nickname = getNickname(connection)
+    
+    userData = recoverData()
+    
+    userData = recover(userData, nickname)
+
+    info = organize(userData, nickname)
+    
+    connection.sendall(str.encode(info))
+
+def getNickname(connection):
+    nickname = getData(connection)
+    nickname = nickname.decode()
+    
+    return nickname.replace('"', '')
+    
+def recoverData():
+    with open('coordinatorData.json', 'r') as jsonFile:
+        return json.load(jsonFile)
+
+def recover(userData, nickname):
+    return userData.get(nickname, 'Apelido não encontrado')
+
+def organize(userData, nickname):
+    info = '\nUsuário: %s' %nickname + "\n\n"
+
+    for fileId in userData:
+        fileName = userData[fileId]
+
+        info += '\nID: %s' %fileId +' ---- '+'Nome do Arquivo: %s' %fileName[0] + '\n'
+
+    return info
 
 def downloadFile():
     message = 'Opção selecionada >> Baixar arquivo'
