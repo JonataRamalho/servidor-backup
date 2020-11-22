@@ -148,13 +148,18 @@ def checkFile(data):
 def listFile(connection):
     nickname = getNickname(connection)
     
-    userData = recoverData()
-    
-    userData = recover(userData, nickname)
+    try:
+        userData = recoverData()
+        
+        userData = recover(userData, nickname)
 
-    info = organize(userData, nickname)
+        info = organize(userData, nickname)
     
-    connection.sendall(str.encode(info))
+        connection.sendall(str.encode(info))
+    except IOError:
+        connection.sendall(str.encode('Nenhum dado salvo'))
+    except KeyError:
+        connection.sendall(str.encode('Apelido não encontrado'))
 
 def getNickname(connection):
     nickname = getData(connection)
@@ -167,7 +172,7 @@ def recoverData():
         return json.load(jsonFile)
 
 def recover(userData, nickname):
-    return userData.get(nickname, 'Apelido não encontrado')
+    return userData[nickname]
 
 def organize(userData, nickname):
     info = '\nUsuário: %s' %nickname + "\n\n"
