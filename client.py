@@ -94,6 +94,8 @@ def upload():
 
       data = json.dumps(uploadData)
       client.sendall(bytes(data, encoding="utf-8"))
+      response = client.recv(1024);
+      print('O ID do seu arquivo é:', response.decode())
 
   else: 
     print('Nao foi possivel se comunicar com o servidor')
@@ -107,14 +109,15 @@ def toList():
     client.sendall(bytes(data, encoding="utf-8"))
 
     response = client.recv(1024)
-    # aqui vai ser modificado para mostrar de uma maneira organizada, por enquanto mostra em json msm
-    print(response)
+    print(response.decode())
 
 def download():
   client.sendall(str.encode('BAIXAR'))
   response = client.recv(1024)
   if response.decode() == '255':
     fileId = input('\nInforme o ID do arquivo que deseja baixar:\n>>> ')
+
+    downloadData['id'] = fileId
 
     data = json.dumps(downloadData)
     client.sendall(bytes(data, encoding="utf-8"))
