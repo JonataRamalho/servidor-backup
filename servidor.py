@@ -6,8 +6,12 @@ con = None
 
 
 def receive():
-    received = read_message()
-    return json.loads(received)
+    #received = read_message()
+
+    # return json.loads(received)
+
+    status = con.recv(1024).decode()
+    print(status)
 
 
 def submit(file):
@@ -29,12 +33,17 @@ def read_data_json():
 
 
 def data_is_empty():
-    file_size = os.stat('data.json').st_size
+    try:
+        file_size = os.stat('data.json').st_size
 
-    if file_size == 0:
-        return True
-    else:
-        return False
+        if file_size == 0:
+            return True
+        else:
+            return False
+
+    except IOError:
+        with open('data.json', 'w', encoding='utf8') as f:
+            return data_is_empty()
 
 
 def save_json(json_file):
@@ -43,16 +52,18 @@ def save_json(json_file):
 
 
 def save(item):
+    print(item)
     data = {}
     if data_is_empty():
         data[item["id"]] = item["content"]
+        print('>', data)
         save_json(data)
-        return submit("success")
+        # return submit("success")
     else:
         data = read_data_json()
         data[item["id"]] = item["content"]
         save_json(data)
-        return submit("success")
+        # return submit("success")
 
 
 def saveIP(ip):
@@ -64,16 +75,22 @@ def saveIP(ip):
 def rescue(key):
     data = {}
     if data_is_empty():
-        return submit("Error: The data is empty")
+        return print("Error: The data is empty")
     else:
         data = read_data_json()
         if key in data:
-            return submit(data[key])
+            return print(data[key])
         else:
-            return submit("Error: ID not found")
+            return print("Error: ID not found")
 
 
 def run(file):
+
+    if file == 'RESCUE':
+        return None
+
+
+'''
     assignment = file["assignment"]
 
     if assignment == "save":
@@ -82,34 +99,36 @@ def run(file):
         rescue(file["id"])
     else:
         return print('609')
+'''
 
 
 def startServer():
-    port = 10000
-    try:
-        with open('ip_cordenador.txt', 'r') as f:
-            host = f
-            host = host.read()
-            if host == '':
-                print(
-                    '\nErro: coordenador não cadastrado! \nEscolha a opção 1 para cadastrargit o IP. \n')
-                menu()
-    except IOError:
-        print(
-            '\nErro: coordenador não cadastrado! \nEscolha a opção 1 para cadastrar o IP. \n')
-        menu()
+    port = 8000
+    host = ''
 
     serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serv_socket.bind((host, port))
     serv_socket.listen()
 
-    while True:
-        global con
-        con, cliente = serv_socket.accept()
-        received_file = receive()
+    global con
+    con, cliente = serv_socket.accept()
 
-        run(received_file)
+    status = con.recv(1024).decode()
+
+    while True:
+        msg = con.recv(1024).decode()
+
+        if msg == 'TRANSMITIR':
+            data = con.recv(1024).decode()
+            data = json.loads(data)
+            save(data)
+        elif msg == 'BAIXAR':
+            ip = con.recv(1024).decode()
+            rescue(ip)
+
+        #received_file = receive()
+        # run(received_file)
 
 
 def sendRegistration():
