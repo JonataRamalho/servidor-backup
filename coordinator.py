@@ -8,6 +8,7 @@ import os
 controlChannelSocket = ''
 data = collections.defaultdict(dict)
 verification = False
+ip = '127.0.0.1'
 
 def connectDataChannel():
     dataChannelSocket = createDataChannelSocket()
@@ -52,7 +53,7 @@ def confirmConnection(connection):
     connection.sendall(str.encode("255"))
 
 def selectOption(connection):
-    data = getData(connection)
+    data = getClientData(connection)
 
     option = data.decode()
 
@@ -63,12 +64,15 @@ def selectOption(connection):
         listFile(connection)
         connection.close()
     elif option == 'BAIXAR':
-        downloadFile()
+        downloadFile(connection)
+        connection.close()
     
-def getData(connection):
+def getClientData(connection):
     return connection.recv(2048)
 
 def transmitFile(connection):
+    global ip
+
     controlChannelSocket.sendall(str.encode("TRANSMITIR"))
 
     identifier = generateID()
@@ -76,8 +80,6 @@ def transmitFile(connection):
     content = getContent(connection)
 
     transmit(content, identifier)
-
-    ip = '127.0.0.1'
 
     saveLocally(content, identifier, ip)
 
@@ -87,7 +89,7 @@ def generateID():
     return random.randint(0, 10000)
 
 def getContent(connection):
-    data = getData(connection)
+    data = getClientData(connection)
     data = data.decode()
     data = json.loads(data)    
 
@@ -162,10 +164,10 @@ def listFile(connection):
         connection.sendall(str.encode('Apelido não encontrado'))
 
 def getNickname(connection):
-    nickname = getData(connection)
+    nickname = getClientData(connection)
     nickname = nickname.decode()
     
-    return nickname.replace('"', '')
+    return nickname.replace('"', '') #Colocar return json.loads(nickname)
     
 def recoverData():
     with open('coordinatorData.json', 'r') as jsonFile:
@@ -184,9 +186,63 @@ def organize(userData, nickname):
 
     return info
 
-def downloadFile():
-    message = 'Opção selecionada >> Baixar arquivo'
-    print(message)
+def downloadFile(connection):
+    controlChannelSocket.sendall(str.encode("BAIXAR"))
+
+    conteudoEncontrado = ''
+    confirmaID = False
+
+    dados = getClientData(connection)
+    dados = dados.decode()
+    dados = json.loads(dados)
+
+    apelido = dados['apelido']
+    fileId = dados['id']
+
+
+    with open('coordinatorData.json', 'r', encoding='utf8') as jsonFile:
+        informacao = json.load(jsonFile)
+    
+    informacao = informacao[apelido]
+
+    for procurandoID in informacao:
+        if fileId == procurandoID:
+            confirmaID = True
+            break
+        else:
+            confirmaID = False
+    
+    if confirmaID == True:
+        send(fileId)
+
+        conteudo = controlChannelSocket.recv(2048)
+        conteudo = conteudo.decode()
+        
+        conteudoEncontrado = informacao[fileId]
+
+        conteudo = {
+            'nome_arquivo': conteudoEncontrado[0],
+            'conteudo': conteudo
+        }
+
+        conteudo = json.dumps(conteudo)
+
+        connection.sendall(bytes(conteudo, encoding="utf-8"))
+
+    else:
+        connection.sendall(str.encode("ID não encontrado"))
+
+
+    #Falta fazer a verificação do IP do servidor com IP salvo com conteúdo
+    
+
+    #1 - Preciso verificar o IP salvo do arquivo com IP do servidor conectado - Falta fazer
+    #2 - Verificar se o identificado do arquivo é igual do usuário que mandou - Ok
+        #2.1 Inválido --> Manda um aviso
+        #2.2 Válido --> Manda o id para servidor
+    #3 - Recupera o arquivo com o servidor - ok
+    #4 - Envia o arquivo com o nome e conteúdo para o cliente
+    #5 - Apaga os dados do arquivo do coordinatorData
 
 def connectControlChannel(): 
     global controlChannelSocket
@@ -210,6 +266,11 @@ def informControlChannelAddress():
 
 def send(data):
     controlChannelSocket.sendall(bytes(data, encoding="utf-8"))
+
+def pegarDadosServidor():
+    conteudo = controlChannelSocket.recv(2048)
+    
+    return conteudo.decode()    
 
 #Main
 dataChannelThread = threading.Thread(target=connectDataChannel, args=())
