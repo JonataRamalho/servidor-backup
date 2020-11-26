@@ -209,6 +209,7 @@ def downloadFile(connection):
     except ValueError as err:
         err = str(err)
         connection.sendall(str.encode(err))
+        send(fileId)
 
     except KeyError:
         connection.sendall(str.encode("ID não encontrado"))
