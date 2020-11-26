@@ -194,17 +194,26 @@ def downloadFile(connection):
     userData = recoverData()
 
     try:
-        userData = userData[nickname][fileId]
+        check = nickname in userData
+        if check == False:
+            raise ValueError('\nUsuário não possui dados salvos no servidor')
+        else:
+            userData = userData[nickname][fileId]
 
-        send(fileId)
+            send(fileId)
 
-        content = structure(userData)
-        
-        connection.sendall(bytes(content, encoding="utf-8"))
+            content = structure(userData)
+            
+            connection.sendall(bytes(content, encoding="utf-8"))
+
+    except ValueError as err:
+        err = str(err)
+        connection.sendall(str.encode(err))
 
     except KeyError:
         connection.sendall(str.encode("ID não encontrado"))
-
+        send(fileId)
+    
 def collectCustomerInformation(connection):
     userData = getClientData(connection)
     userData = userData.decode()
@@ -214,14 +223,6 @@ def collectCustomerInformation(connection):
     fileId = userData['id']
 
     return nickname, fileId
-
-def verificarIdArquivo(userData, fileId):
-    for procurandoID in userData:
-        if fileId == procurandoID:
-            return True
-            break
-        else:
-            return False
 
 def structure(userData):
     content = receiveDataFromServer()
