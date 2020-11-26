@@ -189,60 +189,49 @@ def organize(userData, nickname):
 def downloadFile(connection):
     controlChannelSocket.sendall(str.encode("BAIXAR"))
 
-    conteudoEncontrado = ''
-    confirmaID = False
+    nickname, fileId = collectCustomerInformation(connection)
 
-    dados = getClientData(connection)
-    dados = dados.decode()
-    dados = json.loads(dados)
+    userData = recoverData()
 
-    apelido = dados['apelido']
-    fileId = dados['id']
+    try:
+        userData = userData[nickname][fileId]
 
-
-    with open('coordinatorData.json', 'r', encoding='utf8') as jsonFile:
-        informacao = json.load(jsonFile)
-    
-    informacao = informacao[apelido]
-
-    for procurandoID in informacao:
-        if fileId == procurandoID:
-            confirmaID = True
-            break
-        else:
-            confirmaID = False
-    
-    if confirmaID == True:
         send(fileId)
 
-        conteudo = controlChannelSocket.recv(2048)
-        conteudo = conteudo.decode()
+        content = structure(userData)
         
-        conteudoEncontrado = informacao[fileId]
+        connection.sendall(bytes(content, encoding="utf-8"))
 
-        conteudo = {
-            'nome_arquivo': conteudoEncontrado[0],
-            'conteudo': conteudo
-        }
-
-        conteudo = json.dumps(conteudo)
-
-        connection.sendall(bytes(conteudo, encoding="utf-8"))
-
-    else:
+    except KeyError:
         connection.sendall(str.encode("ID não encontrado"))
 
+def collectCustomerInformation(connection):
+    userData = getClientData(connection)
+    userData = userData.decode()
+    userData = json.loads(userData)
 
-    #Falta fazer a verificação do IP do servidor com IP salvo com conteúdo
+    nickname = userData['apelido']
+    fileId = userData['id']
+
+    return nickname, fileId
+
+def verificarIdArquivo(userData, fileId):
+    for procurandoID in userData:
+        if fileId == procurandoID:
+            return True
+            break
+        else:
+            return False
+
+def structure(userData):
+    content = receiveDataFromServer()
     
+    content = {
+        'nome_arquivo': userData[0],
+        'conteudo': content
+    }
 
-    #1 - Preciso verificar o IP salvo do arquivo com IP do servidor conectado - Falta fazer
-    #2 - Verificar se o identificado do arquivo é igual do usuário que mandou - Ok
-        #2.1 Inválido --> Manda um aviso
-        #2.2 Válido --> Manda o id para servidor
-    #3 - Recupera o arquivo com o servidor - ok
-    #4 - Envia o arquivo com o nome e conteúdo para o cliente
-    #5 - Apaga os dados do arquivo do coordinatorData
+    return json.dumps(content)    
 
 def connectControlChannel(): 
     global controlChannelSocket
@@ -267,10 +256,10 @@ def informControlChannelAddress():
 def send(data):
     controlChannelSocket.sendall(bytes(data, encoding="utf-8"))
 
-def pegarDadosServidor():
-    conteudo = controlChannelSocket.recv(2048)
+def receiveDataFromServer():
+    content = controlChannelSocket.recv(2048)
     
-    return conteudo.decode()    
+    return content.decode()    
 
 #Main
 dataChannelThread = threading.Thread(target=connectDataChannel, args=())
@@ -278,8 +267,3 @@ controlChannelThread = threading.Thread(target=connectControlChannel, args=())
 
 dataChannelThread.start()
 controlChannelThread.start()
-
-
-
-
-
