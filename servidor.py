@@ -79,7 +79,7 @@ def rescue(key):
     else:
         data = read_data_json()
         if key in data:
-            return print(data[key])
+            return submit(data[key])
         else:
             return print("Error: ID not found")
 
