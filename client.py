@@ -2,6 +2,7 @@ import sys
 import os
 import socket
 import json
+import getpass
 
 import clientHelpers
 
@@ -133,10 +134,7 @@ def updatePath(currentDirectory):
   return path
 
 def getUserName():
-  userName = input('\nInforme o nome do usuario do seu pc: ')
-  while not os.path.exists(path+userName):
-    userName = input('\nInsira um usuario valido!\n>>> ')
-
+  userName = getpass.getuser()
   updatePath(userName)
 
 def showSubMenu():
