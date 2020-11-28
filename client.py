@@ -3,6 +3,7 @@ import os
 import socket
 import json
 import getpass
+import time
 
 import clientHelpers
 
@@ -45,15 +46,12 @@ def showMenu():
 def handleSelectedOption(option):
   if (option != 5 and option != 4):
     if not clientHelpers.isEmpty('client_data/apelido_usuario.txt'):
-      handleMenu(option) 
+      if not clientHelpers.isEmpty('client_data/diretorio_download.txt'):
+        handleMenu(option) 
+      else: 
+        print('CONFIGURE UM DIRETORIO PARA DOWNLOAD PRIMEIRO\n')
     else:
       print('CONFIGURE UM APELIDO PRIMEIRO\n')
-      try:
-        handleSubMenu(1)
-        uploadData['apelido'] = clientHelpers.getData('client_data/apelido_usuario.txt')
-        print('Configurado ^^')
-        showMenu()
-      except Exception as e: print("erro: ",e, 'Nao foi possivel configurar apelido')
       
   elif (option == 5):
     print('Saindo...')
@@ -123,10 +121,15 @@ def download():
     data = json.dumps(downloadData)
     client.sendall(bytes(data, encoding="utf-8"))
 
-    response = client.recv(1024)
-    #quando o coordenador estiver enviando certinho o arquivo para download eu trato essa parte para poder baixar de fato
-    print(response)
+    response = json.loads(client.recv(1024))
+    downloadRoute = clientHelpers.getData('client_data/diretorio_download.txt')+response['nome_arquivo']
 
+    with open(downloadRoute, 'w') as file:
+      for value in response['conteudo']:
+        file.write(value)
+      file.close()
+      print('\nARQUIVO BAIXADO COM SUCESSO! Rota: '+downloadRoute)
+  
 def updatePath(currentDirectory):
   global path
   path = path+currentDirectory+'/'
@@ -178,7 +181,7 @@ def confDownload():
     directory = input('>>> ')
 
   with open('client_data/diretorio_download.txt','w') as arquivo:
-    arquivo.write(path+directory)
+    arquivo.write(path+directory+'/')
     print('\nSua rota de download foi configurada para: ' + path+directory)
 
 def confIP():
