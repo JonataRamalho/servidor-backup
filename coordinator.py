@@ -9,6 +9,7 @@ controlChannelSocket = ''
 data = collections.defaultdict(dict)
 verification = False
 ip = '127.0.0.1'
+serverData = collections.defaultdict(dict)
 
 def connectDataChannel():
     dataChannelSocket = createDataChannelSocket()
@@ -236,9 +237,80 @@ def structure(userData):
     return json.dumps(content)    
 
 def connectControlChannel(): 
+    connectControlCommunication()
+'''
     global controlChannelSocket
 
     controlChannelSocket = createControlChannelSocket()
+'''
+
+def connectControlCommunication():
+    server = createControlCommunicationSocket()
+
+    acceptControlConnection(server)
+
+def createControlCommunicationSocket():
+    communication = 'controle'
+
+    address = informAddress(communication)
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(address)
+    server.listen()
+
+    return server
+
+def informAddress(communication):
+    host = ''
+    port = 0
+
+    if communication == 'controle':
+        port = 9999
+    else:
+        port = 8000
+
+    return (host, port)
+
+def acceptControlConnection(server):
+    while True:
+        connection, ip = server.accept()
+
+        serverThread = threading.Thread(target=serverControl, args=(connection, ip))
+        serverThread.start()
+
+def serverControl(connection, ip):
+    global serverData
+    data = receiveData(connection)
+    ip = data['ip']
+    method = data['assignment']
+
+    if method == 'cadastrar':
+        registerServer(serverData, ip)
+        connection.sendall(str.encode('Servidor cadastrado'))
+    else:
+        unsubscribeServer(serverData, ip)
+        connection.sendall(str.encode('Servidor descadastrado'))
+
+def receiveData(connection):
+    dados = connection.recv(2048)
+    dados = dados.decode()
+    
+    return json.loads(dados)
+
+def registerServer(serverData, ip):
+    serverData[ip] = serverData.get(ip, {})
+    serverData[ip] = []
+    serverData[ip].append(0)
+
+    with open('serverData.json', 'w') as jsonFile:
+        json.dump(serverData, jsonFile, indent=2)
+
+def unsubscribeServer(serverData, ip):
+    del serverData[ip]
+        
+    with open('serverData.json', 'w') as jsonFile:
+        json.dump(serverData, jsonFile, indent=2)
 
 def createControlChannelSocket():
     address = informControlChannelAddress()
