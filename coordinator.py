@@ -11,7 +11,7 @@ verification = False
 ip = '127.0.0.1'
 serverData = collections.defaultdict(dict)
 
-def connectDataChannel():
+def dataChannel():
     dataChannelSocket = createDataChannelSocket()
 
     acceptConnection(dataChannelSocket)
@@ -236,7 +236,7 @@ def structure(userData):
 
     return json.dumps(content)    
 
-def connectControlChannel(): 
+def controlChannel(): 
     connectControlCommunication()
 '''
     global controlChannelSocket
@@ -336,8 +336,8 @@ def receiveDataFromServer():
     return content.decode()    
 
 #Main
-dataChannelThread = threading.Thread(target=connectDataChannel, args=())
-controlChannelThread = threading.Thread(target=connectControlChannel, args=())
+dataChannelThread = threading.Thread(target=dataChannel, args=())
+controlChannelThread = threading.Thread(target=controlChannel, args=())
 
 dataChannelThread.start()
 controlChannelThread.start()
