@@ -268,6 +268,7 @@ def informAddress(communication):
     if communication == 'controle':
         port = 9999
     else:
+        host = ''
         port = 8000
 
     return (host, port)
@@ -292,6 +293,8 @@ def serverControl(connection, ip):
         unsubscribeServer(serverData, ip)
         connection.sendall(str.encode('Servidor descadastrado'))
 
+    connection.close()
+
 def receiveData(connection):
     dados = connection.recv(2048)
     dados = dados.decode()
@@ -307,8 +310,8 @@ def registerServer(serverData, ip):
         json.dump(serverData, jsonFile, indent=2)
 
 def unsubscribeServer(serverData, ip):
-    del serverData[ip]
-        
+    serverData.pop(ip, '')        
+    
     with open('serverData.json', 'w') as jsonFile:
         json.dump(serverData, jsonFile, indent=2)
 
