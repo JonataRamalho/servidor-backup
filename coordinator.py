@@ -5,7 +5,7 @@ import random
 import collections
 import os
 
-controlChannelSocket = ''
+dataCommunication = ''
 data = collections.defaultdict(dict)
 verification = False
 ip = '127.0.0.1'
@@ -74,7 +74,7 @@ def getClientData(connection):
 def transmitFile(connection):
     global ip
 
-    controlChannelSocket.sendall(str.encode("TRANSMITIR"))
+    dataCommunication.sendall(str.encode("TRANSMITIR"))
 
     identifier = generateID()
     
@@ -188,7 +188,7 @@ def organize(userData, nickname):
     return info
 
 def downloadFile(connection):
-    controlChannelSocket.sendall(str.encode("BAIXAR"))
+    dataCommunication.sendall(str.encode("BAIXAR"))
 
     nickname, fileId = collectCustomerInformation(connection)
 
@@ -237,12 +237,8 @@ def structure(userData):
     return json.dumps(content)    
 
 def controlChannel(): 
-    connectControlCommunication()
-'''
-    global controlChannelSocket
-
-    controlChannelSocket = createControlChannelSocket()
-'''
+    #connectControlCommunication()
+    connectDataCommunication()
 
 def connectControlCommunication():
     server = createControlCommunicationSocket()
@@ -311,30 +307,29 @@ def registerServer(serverData, ip):
 
 def unsubscribeServer(serverData, ip):
     serverData.pop(ip, '')        
-    
+
     with open('serverData.json', 'w') as jsonFile:
         json.dump(serverData, jsonFile, indent=2)
 
-def createControlChannelSocket():
-    address = informControlChannelAddress()
+def connectDataCommunication():
+    global dataCommunication
+    dataCommunication = createDataCommunicationSocket()
 
-    controlChannelSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    controlChannelSocket.connect(address)
-    controlChannelSocket.sendall(str.encode("255"))
+def createDataCommunicationSocket():
+    communication = 'dados'
+    address = informAddress(communication)
+
+    dataCommunication = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    dataCommunication.connect(address)
+    dataCommunication.sendall(str.encode("255"))
     
-    return controlChannelSocket
-
-def informControlChannelAddress():
-    host = ''
-    port = 8000
-
-    return (host, port)
+    return dataCommunication
 
 def send(data):
-    controlChannelSocket.sendall(bytes(data, encoding="utf-8"))
+    dataCommunication.sendall(bytes(data, encoding="utf-8"))
 
 def receiveDataFromServer():
-    content = controlChannelSocket.recv(2048)
+    content = dataCommunication.recv(2048)
     
     return content.decode()    
 
