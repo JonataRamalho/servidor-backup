@@ -10,7 +10,10 @@ dataCommunication = ''
 data = collections.defaultdict(dict)
 verification = False
 ip = '127.0.0.1'
-serverData = collections.defaultdict(dict)
+serverData = {
+    'ip': [],
+    'lastServer': 0
+}
 server = ''
 
 def dataChannel():
@@ -287,7 +290,6 @@ def acceptControlConnection(server):
         serverThread.start()
 
 def serverControl(connection, ip):
-    global serverData
     global server
 
     data = receiveData(connection)
@@ -295,11 +297,11 @@ def serverControl(connection, ip):
     method = data['assignment']
 
     if method == 'cadastrar':
-        registerServer(serverData, ip)
+        registerServer(ip)
         connection.sendall(str.encode('Servidor cadastrado'))
         connection.close()
     else:
-        unsubscribeServer(serverData, ip)
+        unsubscribeServer(ip)
         connection.sendall(str.encode('Servidor descadastrado'))
         connection.close()
         runDataCommunication()
@@ -310,17 +312,29 @@ def receiveData(connection):
     
     return json.loads(dados)
 
-def registerServer(serverData, ip):
-    serverData[ip] = serverData.get(ip, {})
-    serverData[ip] = []
-    serverData[ip].append(0)
+def registerServer(ip):
+    global serverData
+    
+    serverData['ip'].append(ip)
+    serverData['lastServer'] = len(serverData['ip']) - 1
 
     with open('serverData.json', 'w') as jsonFile:
         json.dump(serverData, jsonFile, indent=2)
 
-def unsubscribeServer(serverData, ip):
-    serverData.pop(ip, '')        
+def unsubscribeServer(ip):
+    global serverData
 
+    with open('serverData.json', 'r') as jsonFile:
+        serverData = json.load(jsonFile)
+
+    serverData['ip'].remove(ip)
+    checkSize = len(serverData['ip'])
+    
+    if checkSize == 0:
+        serverData['lastServer'] = 0
+    else:
+        serverData['lastServer'] = len(serverData['ip']) - 1
+    
     with open('serverData.json', 'w') as jsonFile:
         json.dump(serverData, jsonFile, indent=2)
 
@@ -332,7 +346,8 @@ def runDataCommunication():
 
     while True:
         try:
-            if os.stat("serverData.json").st_size != 2:
+            if os.stat("serverData.json").st_size != 33:
+
                 time.sleep(1)
                 
                 dataCommunication = createDataCommunicationSocket()
