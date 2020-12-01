@@ -345,13 +345,15 @@ def runDataCommunication():
 def createDataCommunicationSocket():
     communication = 'dados'
     address = informAddress(communication)
+    
+    dataCommunication = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    try:
-        dataCommunication = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
+    try:        
         dataCommunication.connect(address)
         dataCommunication.sendall(str.encode("255"))        
     except ConnectionRefusedError as err:
-        print('Erro:', err, '>>> Servidor de arquivo está fora do ar')
+        print('\nErro: Servidor de Arquivo está fora do ar. Conecte o Servidor de Arquivo e renicie o Coordenador.')
+        
     return dataCommunication
 
 def send(data):
