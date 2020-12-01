@@ -4,12 +4,14 @@ import json
 import random
 import collections
 import os
+import time
 
 dataCommunication = ''
 data = collections.defaultdict(dict)
 verification = False
 ip = '127.0.0.1'
 serverData = collections.defaultdict(dict)
+server = ''
 
 def dataChannel():
     dataChannelSocket = createDataChannelSocket()
@@ -73,6 +75,7 @@ def getClientData(connection):
 
 def transmitFile(connection):
     global ip
+    global dataCommunication
 
     dataCommunication.sendall(str.encode("TRANSMITIR"))
 
@@ -188,6 +191,8 @@ def organize(userData, nickname):
     return info
 
 def downloadFile(connection):
+    global dataCommunication
+
     dataCommunication.sendall(str.encode("BAIXAR"))
 
     nickname, fileId = collectCustomerInformation(connection)
@@ -237,10 +242,15 @@ def structure(userData):
     return json.dumps(content)    
 
 def controlChannel(): 
-    #connectControlCommunication()
-    connectDataCommunication()
+    controlCommunicationThread = threading.Thread(target=connectControlCommunication, args=())
+    dataCommunicationThread = threading.Thread(target=connectDataCommunication, args=())
+    
+    controlCommunicationThread.start()
+    dataCommunicationThread.start()
 
 def connectControlCommunication():
+    global server
+
     server = createControlCommunicationSocket()
 
     acceptControlConnection(server)
@@ -278,6 +288,8 @@ def acceptControlConnection(server):
 
 def serverControl(connection, ip):
     global serverData
+    global server
+
     data = receiveData(connection)
     ip = data['ip']
     method = data['assignment']
@@ -285,11 +297,12 @@ def serverControl(connection, ip):
     if method == 'cadastrar':
         registerServer(serverData, ip)
         connection.sendall(str.encode('Servidor cadastrado'))
+        connection.close()
     else:
         unsubscribeServer(serverData, ip)
         connection.sendall(str.encode('Servidor descadastrado'))
-
-    connection.close()
+        connection.close()
+        runDataCommunication()
 
 def receiveData(connection):
     dados = connection.recv(2048)
@@ -312,23 +325,43 @@ def unsubscribeServer(serverData, ip):
         json.dump(serverData, jsonFile, indent=2)
 
 def connectDataCommunication():
+    runDataCommunication()
+    
+def runDataCommunication():
     global dataCommunication
-    dataCommunication = createDataCommunicationSocket()
+
+    while True:
+        try:
+            if os.stat("serverData.json").st_size != 2:
+                time.sleep(1)
+                
+                dataCommunication = createDataCommunicationSocket()
+                
+                break
+        except FileNotFoundError as err:
+            pass
+        
 
 def createDataCommunicationSocket():
     communication = 'dados'
     address = informAddress(communication)
 
-    dataCommunication = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    dataCommunication.connect(address)
-    dataCommunication.sendall(str.encode("255"))
-    
+    try:
+        dataCommunication = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
+        dataCommunication.connect(address)
+        dataCommunication.sendall(str.encode("255"))        
+    except ConnectionRefusedError as err:
+        print('Erro:', err, '>>> Servidor de arquivo está fora do ar')
     return dataCommunication
 
 def send(data):
+    global dataCommunication
+
     dataCommunication.sendall(bytes(data, encoding="utf-8"))
 
 def receiveDataFromServer():
+    global dataCommunication
+
     content = dataCommunication.recv(2048)
     
     return content.decode()    
