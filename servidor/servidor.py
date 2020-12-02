@@ -1,6 +1,7 @@
 import socket
 import json
 import os
+import threading
 
 con = None
 
@@ -88,31 +89,45 @@ def startServer():
     except IOError:
         print('Erro')
 
-    port = 8000
+    try:
+        port = 8000
 
-    serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    serv_socket.bind((host, port))
-    serv_socket.listen()
+        serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        serv_socket.bind((host, port))
+        serv_socket.listen()
 
-    global con
-    con, cliente = serv_socket.accept()
+        while True:
+            global con
+            con, cliente = serv_socket.accept()
 
-    status = con.recv(1024).decode()
+            status = con.recv(1024).decode()
+            t = threading.Thread(target=teste, args=(con,))
+            t.start()
+            
+    finally:
+        con.sendall(str.encode('Desativado'))
 
+def teste(con):
     while True:
-        msg = con.recv(1024).decode()
-
+        msg = con.recv(1024)
+        msg = msg.decode()
         if msg == 'TRANSMITIR':
             data = con.recv(1024).decode()
             data = json.loads(data)
             save(data)
+            con.close()
+            break
 
         elif msg == 'BAIXAR':
             ip = con.recv(1024).decode()
             rescue(ip)
-
-
+            con.close()
+            break
+        
+        elif msg == '':
+            break 
+        
 def sendRegistration():
     HOST = open('ip_cordenador.txt', 'r')
     HOST = HOST.read()
@@ -234,8 +249,9 @@ def menu():
                 register()
             else:
                 menuSimplificado()
-    except IOError:
+    except FileNotFoundError:
         register()
-
+    except IOError:
+        print('\nServidor fechado')
 
 menu()
