@@ -12,9 +12,10 @@ verification = False
 ip = '127.0.0.1'
 serverData = {
     'ip': [],
-    'lastServer': 0
+    'lastServerUsed': 0
 }
 server = ''
+option = ''
 
 def dataChannel():
     dataChannelSocket = createDataChannelSocket()
@@ -59,6 +60,8 @@ def confirmConnection(connection):
     connection.sendall(str.encode("255"))
 
 def selectOption(connection):
+    global option
+
     data = getClientData(connection)
 
     option = data.decode()
@@ -295,16 +298,51 @@ def createControlCommunicationSocket():
     return server
 
 def informAddress(communication):
+    global option
+    
     host = ''
     port = 0
 
     if communication == 'controle':
         port = 9999
     else:
-        host = ''#Criar uma função par escolher o último ip
-        port = 8000
+        while True:
+            if option == 'TRANSMITIR':
+                host = getIp()
+                port = 8000
+                print('Host do TRANSMITIR')
+                break
+            else:
+                host = ''
+                port = 8000
+                print('Host do BAIXAR')
+                break
 
     return (host, port)
+
+def getIp():
+    serverData = ''
+
+    with open('serverData.json', 'r') as jsonFile:
+        serverData = json.load(jsonFile)
+
+    ip = serverData['ip']
+
+    if len(ip)-1 == serverData['lastServerUsed']:
+        serverData['lastServerUsed'] = 0
+
+        with open('serverData.json', 'w') as jsonFile:
+            json.dump(serverData, jsonFile, indent=2)
+
+        return ip[0]
+    
+    else:
+        serverData['lastServerUsed'] += 1
+
+        with open('serverData.json', 'w') as jsonFile:
+            json.dump(serverData, jsonFile, indent=2)
+
+        return ip[serverData['lastServerUsed']]
 
 def acceptControlConnection(server):
     while True:
@@ -340,7 +378,6 @@ def registerServer(ip):
     global serverData
     
     serverData['ip'].append(ip)
-    serverData['lastServer'] = len(serverData['ip']) - 1
 
     with open('serverData.json', 'w') as jsonFile:
         json.dump(serverData, jsonFile, indent=2)
@@ -352,12 +389,6 @@ def unsubscribeServer(ip):
         serverData = json.load(jsonFile)
 
     serverData['ip'].remove(ip)
-    checkSize = len(serverData['ip'])
-    
-    if checkSize == 0:
-        serverData['lastServer'] = 0
-    else:
-        serverData['lastServer'] = len(serverData['ip']) - 1
     
     with open('serverData.json', 'w') as jsonFile:
         json.dump(serverData, jsonFile, indent=2)
