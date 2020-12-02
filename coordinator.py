@@ -80,6 +80,12 @@ def transmitFile(connection):
     global ip
     global dataCommunication
 
+    connectDataCommunication()
+
+    dataCommunication.sendall(str.encode("255"))   
+
+    time.sleep(1)
+    
     dataCommunication.sendall(str.encode("TRANSMITIR"))
 
     identifier = generateID()
@@ -95,7 +101,7 @@ def transmitFile(connection):
     disconnect = dataCommunication.recv(1024)
     
     if disconnect.decode() == 'Desativado':
-        print('Dori Me')
+        #print('Dori Me')
         dataCommunication.close()
     
 def generateID():
@@ -252,10 +258,10 @@ def structure(userData):
 
 def controlChannel(): 
     controlCommunicationThread = threading.Thread(target=connectControlCommunication, args=())
-    dataCommunicationThread = threading.Thread(target=connectDataCommunication, args=())
+    #dataCommunicationThread = threading.Thread(target=connectDataCommunication, args=())
     
     controlCommunicationThread.start()
-    dataCommunicationThread.start()
+    #dataCommunicationThread.start()
 
 def connectControlCommunication():
     global server
@@ -371,7 +377,6 @@ def createDataCommunicationSocket():
 
     try:        
         dataCommunication.connect(address)
-        dataCommunication.sendall(str.encode("255"))        
     except ConnectionRefusedError as err:
         print('\nServidor de Arquivo está fora do ar.')
         
