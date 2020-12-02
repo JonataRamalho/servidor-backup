@@ -9,13 +9,14 @@ import time
 dataCommunication = ''
 data = collections.defaultdict(dict)
 verification = False
-ip = '127.0.0.1'
+ip = ''
 serverData = {
     'ip': [],
     'lastServerUsed': 0
 }
 server = ''
 option = ''
+donwloadIp = ''
 
 def dataChannel():
     dataChannelSocket = createDataChannelSocket()
@@ -80,7 +81,6 @@ def getClientData(connection):
     return connection.recv(2048)
 
 def transmitFile(connection):
-    global ip
     global dataCommunication
 
     connectDataCommunication()
@@ -211,6 +211,8 @@ def organize(userData, nickname):
 def downloadFile(connection):
     global dataCommunication
 
+    global donwloadIp
+
     connectDataCommunication()
 
     dataCommunication.sendall(str.encode("255"))   
@@ -232,6 +234,8 @@ def downloadFile(connection):
 
             send(fileId)
 
+            donwloadIp = userData[1]
+
             content = structure(userData)
             
             connection.sendall(bytes(content, encoding="utf-8"))
@@ -239,7 +243,7 @@ def downloadFile(connection):
             disconnect = dataCommunication.recv(1024)
 
             if disconnect.decode() == 'Desativado':
-                print('Dori Me')
+                #print('Dori Me')
                 dataCommunication.close()
             
     except ValueError as err:
@@ -310,23 +314,21 @@ def informAddress(communication):
             if option == 'TRANSMITIR':
                 host = getIp()
                 port = 8000
-                print('Host do TRANSMITIR')
                 break
             else:
-                host = ''
+                host = donwloadIp
                 port = 8000
-                print('Host do BAIXAR')
                 break
 
     return (host, port)
 
 def getIp():
-    serverData = ''
+    global ip
 
     with open('serverData.json', 'r') as jsonFile:
         serverData = json.load(jsonFile)
 
-    ip = serverData['ip']
+    arrayIp = serverData['ip']
 
     if len(ip)-1 == serverData['lastServerUsed']:
         serverData['lastServerUsed'] = 0
@@ -334,7 +336,9 @@ def getIp():
         with open('serverData.json', 'w') as jsonFile:
             json.dump(serverData, jsonFile, indent=2)
 
-        return ip[0]
+        ip = arrayIp[0]
+
+        return ip
     
     else:
         serverData['lastServerUsed'] += 1
@@ -342,7 +346,9 @@ def getIp():
         with open('serverData.json', 'w') as jsonFile:
             json.dump(serverData, jsonFile, indent=2)
 
-        return ip[serverData['lastServerUsed']]
+        ip = arrayIp[serverData['lastServerUsed']]
+
+        return ip
 
 def acceptControlConnection(server):
     while True:
