@@ -329,26 +329,31 @@ def getIp():
         serverData = json.load(jsonFile)
 
     arrayIp = serverData['ip']
+    try:
+        if len(arrayIp)-1 == serverData['lastServerUsed']:
+            serverData['lastServerUsed'] = 0
 
-    if len(ip)-1 == serverData['lastServerUsed']:
-        serverData['lastServerUsed'] = 0
+            with open('serverData.json', 'w') as jsonFile:
+                json.dump(serverData, jsonFile, indent=2)
+
+            ip = arrayIp[0]
+
+            return ip
+        
+        else:
+            serverData['lastServerUsed'] += 1
+
+            with open('serverData.json', 'w') as jsonFile:
+                json.dump(serverData, jsonFile, indent=2)
+
+            ip = arrayIp[serverData['lastServerUsed']]
+
+            return ip
+    except IndexError as err:
+        serverData['lastServerUsed'] = -1
 
         with open('serverData.json', 'w') as jsonFile:
             json.dump(serverData, jsonFile, indent=2)
-
-        ip = arrayIp[0]
-
-        return ip
-    
-    else:
-        serverData['lastServerUsed'] += 1
-
-        with open('serverData.json', 'w') as jsonFile:
-            json.dump(serverData, jsonFile, indent=2)
-
-        ip = arrayIp[serverData['lastServerUsed']]
-
-        return ip
 
 def acceptControlConnection(server):
     while True:
@@ -384,7 +389,6 @@ def registerServer(ip):
     global serverData
     
     serverData['ip'].append(ip)
-    serverData['lastServerUsed'] = -1
 
     with open('serverData.json', 'w') as jsonFile:
         json.dump(serverData, jsonFile, indent=2)
