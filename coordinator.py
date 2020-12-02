@@ -384,6 +384,7 @@ def registerServer(ip):
     global serverData
     
     serverData['ip'].append(ip)
+    serverData['lastServerUsed'] = -1
 
     with open('serverData.json', 'w') as jsonFile:
         json.dump(serverData, jsonFile, indent=2)
