@@ -92,6 +92,12 @@ def transmitFile(connection):
 
     connection.sendall(str.encode(str(identifier)))
 
+    disconnect = dataCommunication.recv(1024)
+    
+    if disconnect.decode() == 'Desativado':
+        print('Dori Me')
+        dataCommunication.close()
+    
 def generateID():
     return random.randint(0, 10000)
 
@@ -277,7 +283,7 @@ def informAddress(communication):
     if communication == 'controle':
         port = 9999
     else:
-        host = ''
+        host = ''#Criar uma função par escolher o último ip
         port = 8000
 
     return (host, port)
@@ -367,7 +373,7 @@ def createDataCommunicationSocket():
         dataCommunication.connect(address)
         dataCommunication.sendall(str.encode("255"))        
     except ConnectionRefusedError as err:
-        print('\nErro: Servidor de Arquivo está fora do ar. Conecte o Servidor de Arquivo e renicie o Coordenador.')
+        print('\nServidor de Arquivo está fora do ar.')
         
     return dataCommunication
 
