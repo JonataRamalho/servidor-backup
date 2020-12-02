@@ -85,7 +85,7 @@ def transmitFile(connection):
     dataCommunication.sendall(str.encode("255"))   
 
     time.sleep(1)
-    
+
     dataCommunication.sendall(str.encode("TRANSMITIR"))
 
     identifier = generateID()
@@ -208,6 +208,12 @@ def organize(userData, nickname):
 def downloadFile(connection):
     global dataCommunication
 
+    connectDataCommunication()
+
+    dataCommunication.sendall(str.encode("255"))   
+
+    time.sleep(1)
+    
     dataCommunication.sendall(str.encode("BAIXAR"))
 
     nickname, fileId = collectCustomerInformation(connection)
@@ -227,6 +233,12 @@ def downloadFile(connection):
             
             connection.sendall(bytes(content, encoding="utf-8"))
 
+            disconnect = dataCommunication.recv(1024)
+
+            if disconnect.decode() == 'Desativado':
+                print('Dori Me')
+                dataCommunication.close()
+            
     except ValueError as err:
         err = str(err)
         connection.sendall(str.encode(err))
