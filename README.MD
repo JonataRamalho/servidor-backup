@@ -13,7 +13,7 @@
 
 ## Sobre
 
-O **Servidor Backup** é uma aplicação que tem como proposta possibilitar que usuários, fazendo uso de uma aplicação cliente, possam salvar e recuperar arquivos armazenados em rede.
+O **Servidor Backup** é uma aplicação que tem como proposta possibilitar que usuários, fazendo uso de uma aplicação cliente, possam salvar e recuperar arquivos **.txt** armazenados em rede.
 
 <p  align="center">
    <img  alt="design da aplicação"  width="500px" src="./.github/esquema.svg" />
@@ -63,32 +63,32 @@ A aplicação como visto na imagem acima apresenta três tipos de nós. São ele
 
 ```sh
   # TERMINAL 1: Inicia o coordenador
-  $ python3 coordinator.py
+  $ python3 coordinator/coordinator.py
 ```
 
 ```sh
   # TERMINAL 2: Inicia o servidor
-  $ python3 server.py
+  $ python3 server/server.py
 ```
 
 ```sh
   # TERMINAL 3: Inicia o cliene
-  $ python3 client.py
+  $ python3 client/client.py
 ```
 
-> **Lembre-se** _de executar nessa ordem para que tudo funcione como o desejado_ 
+> **Lembre-se** _de executar nessa ordem para que tudo funcione como o desejado_
 
 3. Do lado do cliente irá aparecer o seguinte menu:
 
 ```
-  1. Transmitir 			# Faz o upload de arquivos
-  2. Listar					# Lista os arquivos que estão no servidor
-  3. Baixar					# Faz download de arquivo
+  1. Transmitir 						# Faz o upload de arquivos
+  2. Listar									# Lista os arquivos que estão no servidor
+  3. Baixar									# Faz download de arquivo
   4. Configurações	        # Pontos necessário para iniciar o cliente
-  5. Sair					# Sai do cliente
+  5. Sair										# Sai do cliente
 ```
 
-> **É de suma importância** fazer todas as configurações necessário antes de iniciar quaisquer método ( 1, 2 ou 3)
+> **É de suma importância** fazer todas as configurações necessárias antes de iniciar quaisquer método ( 1, 2 ou 3)
 
 4.  Já do lado do servidor é necessário fazer um cadastramento, para que haja a comunicação entre coordenador <-> servidor, e assim o cliente poderá enviar/receber dados.
 
