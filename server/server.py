@@ -5,20 +5,16 @@ import threading
 
 con = None
 
-
 def receive():
     status = con.recv(1024).decode()
     print(status)
 
-
 def submit(file):
     con.send(file.encode())
-
 
 def read_message():
     message = con.recv(1024)
     return message.decode()
-
 
 def read_data_json():
     try:
@@ -27,7 +23,6 @@ def read_data_json():
     except IOError:
         with open('data.json', 'w', encoding='utf8') as f:
             return read_data_json()
-
 
 def data_is_empty():
     try:
@@ -42,11 +37,9 @@ def data_is_empty():
         with open('data.json', 'w', encoding='utf8') as f:
             return data_is_empty()
 
-
 def save_json(json_file):
     with open('data.json', 'w') as f:
         json.dump(json_file, f, indent=2)
-
 
 def save(item):
     print(item)
@@ -66,7 +59,6 @@ def saveIP(ip):
     file.write(ip)
     file.close()
 
-
 def rescue(key):
     data = {}
     if data_is_empty():
@@ -77,7 +69,6 @@ def rescue(key):
             return submit(data[key])
         else:
             return print("Error: ID not found")
-
 
 def startServer():
     print('\nSERVIDOR INICIADO\n')
@@ -153,7 +144,6 @@ def sendRegistration():
     data = serv_socket.recv(1024).decode()
     print('Response:', data)
 
-
 def register():
     response = []
     c = False
@@ -173,7 +163,6 @@ def register():
 
     sendRegistration()
     startServer()
-
 
 def unsubscribe():
     HOST = open('ip_cordenador.txt', 'r')
@@ -206,7 +195,6 @@ def unsubscribe():
     print('\nCadastrar novamente.\n')
     menu()
 
-
 def menuCompleto():
     print('1: Cadastrar servidor')
     print('2: Iniciar')
@@ -224,7 +212,6 @@ def menuCompleto():
         print('Invalido \n')
         menuCompleto()
 
-
 def menuSimplificado():
     print('1: Iniciar')
     print('2: Descadastrar \n')
@@ -238,7 +225,6 @@ def menuSimplificado():
     else:
         print('Invalido \n')
         menu()
-
 
 def menu():
     try:
