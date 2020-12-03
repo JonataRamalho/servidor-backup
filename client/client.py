@@ -70,7 +70,7 @@ def handleMenu(option):
     return case[option](option)
 
   except:
-    print('OPCAO INVALIDA!')
+    print('ID errado ou Erro no Servidor\n')
     showMenu()
 
 def upload():
