@@ -81,11 +81,11 @@ A aplicação como visto na imagem acima apresenta três tipos de nós. São ele
 3. Do lado do cliente irá aparecer o seguinte menu:
 
 ```
-  1. Transmitir 						# Faz o upload de arquivos
-  2. Listar									# Lista os arquivos que estão no servidor
-  3. Baixar									# Faz download de arquivo
-  4. Configurações	        # Pontos necessário para iniciar o cliente
-  5. Sair										# Sai do cliente
+  1. Transmitir 		# Faz o upload de arquivos
+  2. Listar			# Lista os arquivos que estão no servidor
+  3. Baixar			# Faz download de arquivo
+  4. Configurações	    	# Pontos necessário para iniciar o cliente
+  5. Sair			# Sai do cliente
 ```
 
 > **É de suma importância** fazer todas as configurações necessárias antes de iniciar quaisquer método ( 1, 2 ou 3)
