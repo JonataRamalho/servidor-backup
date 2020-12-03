@@ -85,28 +85,33 @@ def transmitFile(connection):
 
     connectDataCommunication()
 
-    dataCommunication.sendall(str.encode("255"))   
-
-    time.sleep(1)
-
-    dataCommunication.sendall(str.encode("TRANSMITIR"))
-
-    identifier = generateID()
+    try:
+        dataCommunication.sendall(str.encode("255"))   
     
-    content = getContent(connection)
+        time.sleep(1)
 
-    transmit(content, identifier)
+        dataCommunication.sendall(str.encode("TRANSMITIR"))
 
-    saveLocally(content, identifier, ip)
+        identifier = generateID()
+        
+        content = getContent(connection)
 
-    connection.sendall(str.encode(str(identifier)))
+        transmit(content, identifier)
 
-    disconnect = dataCommunication.recv(1024)
-    
-    if disconnect.decode() == 'Desativado':
-        #print('Dori Me')
-        dataCommunication.close()
-    
+        saveLocally(content, identifier, ip)
+
+        connection.sendall(str.encode(str(identifier)))
+
+        disconnect = dataCommunication.recv(1024)
+        
+        if disconnect.decode() == 'Desativado':
+            #print('Dori Me')
+            dataCommunication.close()
+            
+    except BrokenPipeError:
+        connection.sendall(str.encode('Servidor offline'))
+        connection.close()   
+
 def generateID():
     return random.randint(0, 10000)
 
@@ -215,45 +220,50 @@ def downloadFile(connection):
 
     connectDataCommunication()
 
-    dataCommunication.sendall(str.encode("255"))   
-
-    time.sleep(1)
-    
-    dataCommunication.sendall(str.encode("BAIXAR"))
-
-    nickname, fileId = collectCustomerInformation(connection)
-
-    userData = recoverData()
-
     try:
-        check = nickname in userData
-        if check == False:
-            raise ValueError('\nUsuário não possui dados salvos no servidor')
-        else:
-            userData = userData[nickname][fileId]
+        dataCommunication.sendall(str.encode("255"))   
 
+        time.sleep(1)
+        
+        dataCommunication.sendall(str.encode("BAIXAR"))
+
+        nickname, fileId = collectCustomerInformation(connection)
+
+        userData = recoverData()
+
+        try:
+            check = nickname in userData
+            if check == False:
+                raise ValueError('\nUsuário não possui dados salvos no servidor')
+            else:
+                userData = userData[nickname][fileId]
+
+                send(fileId)
+
+                donwloadIp = userData[1]
+
+                content = structure(userData)
+                
+                connection.sendall(bytes(content, encoding="utf-8"))
+
+                disconnect = dataCommunication.recv(1024)
+
+                if disconnect.decode() == 'Desativado':
+                    #print('Dori Me')
+                    dataCommunication.close()
+                
+        except ValueError as err:
+            err = str(err)
+            connection.sendall(str.encode(err))
             send(fileId)
 
-            donwloadIp = userData[1]
+        except KeyError:
+            connection.sendall(str.encode("ID não encontrado"))
+            send(fileId)
 
-            content = structure(userData)
-            
-            connection.sendall(bytes(content, encoding="utf-8"))
-
-            disconnect = dataCommunication.recv(1024)
-
-            if disconnect.decode() == 'Desativado':
-                #print('Dori Me')
-                dataCommunication.close()
-            
-    except ValueError as err:
-        err = str(err)
-        connection.sendall(str.encode(err))
-        send(fileId)
-
-    except KeyError:
-        connection.sendall(str.encode("ID não encontrado"))
-        send(fileId)
+    except BrokenPipeError:
+        connection.sendall(str.encode('Servidor offline'))
+        connection.close()   
     
 def collectCustomerInformation(connection):
     userData = getClientData(connection)
