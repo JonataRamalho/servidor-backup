@@ -92,6 +92,15 @@ A aplicação como visto na imagem acima apresenta três tipos de nós. São ele
 
 4.  Já do lado do servidor é necessário fazer um cadastramento, para que haja a comunicação entre coordenador <-> servidor, e assim o cliente poderá enviar/receber dados.
 
+```
+# Ao inicia-lo pela primeira vez será solicitado o endereço IP do coordenador
+```
+- A partir da segunda execução o mesmo já estará cadastrado e exibirá o seguinte menu:
+```
+  1: Iniciar 		# Executa o servidor
+  2. Descadastrar	# Apaga o servidor em questão da lista de servidores disponíveis do coordenador
+```
+
 ## Protocolo
 
 Basicamente define quais mensagens serão enviadas entre os serviços para que haja a comunicação entre eles.
