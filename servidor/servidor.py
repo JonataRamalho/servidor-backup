@@ -140,7 +140,7 @@ def sendRegistration():
         print('\nErro: Coordenador não encontrado. \nVerifique se ele está online.\n')
 
     hostName = socket.gethostname()
-    ip = socket.gethostbyname(hostName)
+    ip = serv_socket.getsockname()[0]
 
     msg = {
         "assignment": "cadastrar",
